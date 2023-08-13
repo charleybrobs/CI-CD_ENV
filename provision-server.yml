@@ -1,0 +1,26 @@
+~ name: Initial system setup
+  hosts:  server
+  task: 
+    ~ name: make ssh service is enabled upon system boot 
+    service: name=ssh enabled=yes
+    ~name:create admin group
+      group : name=admin state=present
+    ~name: create admin user
+      user:
+        name: admin
+        group: admin
+        home: /home/admin
+        password: 1234QWer
+        shell: /bin/bash
+        state: present
+    ~name: /install TFTP server packages
+      package: name=tftpd-hpa state=present
+    ~name: configure TFTP server for write access
+    lineinfile:
+      path:/etc/default/tftpd-hpa 
+      line:'TFTP_OPTIONS= "~~secure ~~verbose ~4 ~c"' 
+      state: present
+    ~name: configure /var/lib/tftpboot permissions
+      file: path=/var/lib/tftpboot owner=root group=tftp mode=0775
+    ~name: start tftpd-hpa service and enable it upon system oot
+      service: name=tftpd-hpa state=restarted enabled=yes
